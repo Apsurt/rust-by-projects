@@ -20,3 +20,12 @@ pub fn random_vector(n: i32) -> Vec<i32> {
     nums.shuffle(&mut rng);
     return nums
 }
+
+pub fn is_sorted(nums: &[i32]) -> bool {
+    for idx in 1..nums.len() {
+        if nums[idx-1] > nums[idx] {
+            return false;
+        }
+    }
+    return  true;
+}
