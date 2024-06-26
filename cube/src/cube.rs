@@ -35,7 +35,7 @@ impl Cube {
     }
     
     pub fn get_projection(&mut self) -> Vec<na::Vector2<f64>> {
-        
+        todo!()
     }
     
     pub fn get_vertices(scale: f64) -> Vec<na::Vector3<f64>> {
