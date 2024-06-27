@@ -9,31 +9,23 @@ use ratatui::{
         terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
         ExecutableCommand,
     },
-    layout::Rect,
     style::Color,
     symbols::Marker,
     terminal::{Frame, Terminal},
     widgets::{
-        canvas::{Canvas, Circle, Points},
-        Block, Widget,
+        canvas::{Canvas, Line}, Block, BorderType, Borders, Widget
     },
 };
 
 mod cube;
 use cube::Cube;
 
-fn main() {// -> io::Result<()> {
-    
-    let app = App::new();
-    //App::run()
+fn main() -> io::Result<()> {
+    App::run()
 }
 
 struct App {
-    ball: Circle,
     cube: Cube,
-    playground: Rect,
-    vx: f64,
-    vy: f64,
     marker: Marker,
     pause: bool,
 }
@@ -41,16 +33,7 @@ struct App {
 impl App {
     fn new() -> Self {
         Self {
-            ball: Circle {
-                x: 40.0,
-                y: 80.0,
-                radius: 20.0,
-                color: Color::LightRed,
-            },
-            cube: Cube::new(1.0),
-            playground: Rect::new(10, 10, 200, 100),
-            vx: 1.0,
-            vy: 1.0,
+            cube: Cube::new(200.0, [0.0, 0.0, 1000.0]),
             marker: Marker::Braille,
             pause: false,
         }
@@ -60,7 +43,7 @@ impl App {
         let mut terminal = init_terminal()?;
         let mut app = Self::new();
         let mut last_tick = Instant::now();
-        let tick_rate = Duration::from_millis(16);
+        let tick_rate = Duration::from_millis(1);
         loop {
             let _ = terminal.draw(|frame| app.ui(frame));
             let timeout = tick_rate.saturating_sub(last_tick.elapsed());
@@ -85,21 +68,7 @@ impl App {
 
     fn on_tick(&mut self) {
         if !self.pause {
-            let ball = &self.ball;
-            let playground = self.playground;
-            if ball.x - ball.radius < f64::from(playground.left())
-                || ball.x + ball.radius > f64::from(playground.right())
-            {
-                self.vx = -self.vx;
-            }
-            if ball.y - ball.radius < f64::from(playground.top())
-                || ball.y + ball.radius > f64::from(playground.bottom())
-            {
-                self.vy = -self.vy;
-            }
-            
-            self.ball.x += self.vx;
-            self.ball.y += self.vy;
+            self.cube.vertices = Cube::rot(&self.cube.vertices, 0.0015);
         }
     }
 
@@ -110,13 +79,33 @@ impl App {
 
     fn canvas_widget(&self) -> impl Widget + '_ {
         Canvas::default()
-            .block(Block::bordered())
+            .block(
+                Block::default()
+                .borders(Borders::all())
+                .border_type(BorderType::Rounded)
+            )
             .marker(self.marker)
             .paint(|ctx| {
-                ctx.draw(&self.ball);
+                for line in self.get_lines() {
+                    ctx.draw(&line);
+                }
             })
             .x_bounds([10.0, 210.0])
             .y_bounds([10.0, 110.0])
+    }
+    
+    fn get_lines(&self) -> Vec<Line> {
+        let mut lines: Vec<Line> = Vec::new();
+        let points = self.cube.get_projection(500.0);
+        for edge in &self.cube.edges {
+            let (x1,y1) = points[edge[0]];
+            let (x2,y2) = points[edge[1]];
+            let color = Color::LightBlue;
+            lines.push(
+                Line { x1, y1, x2, y2, color }
+            )
+        }
+        lines
     }
 }
 
