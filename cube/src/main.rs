@@ -33,7 +33,7 @@ struct App {
 impl App {
     fn new() -> Self {
         Self {
-            cube: Cube::new(200.0, [0.0, 0.0, 1000.0]),
+            cube: Cube::new(200.0, [0.0, 0.0, 900.0]),
             marker: Marker::Braille,
             pause: false,
         }
