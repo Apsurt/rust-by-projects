@@ -28,7 +28,7 @@ impl eframe::App for SortingVisualizer {
         egui::CentralPanel::default().show(ctx, |ui| {
             // Top section for buttons
             ui.vertical_centered(|ui| {
-                ui.add_space(20.0); // Add some top margin
+                ui.add_space(30.0); // Add some top margin
                 ui.horizontal(|ui| {
                     if ui.button("Shuffle").clicked() {
                         println!("shuffled");
